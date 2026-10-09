@@ -39,13 +39,14 @@ pub fn build_picker_view(snapshot: &PickerSnapshot) -> PickerView {
         .as_ref()
         .map(|viewport| viewport.logical_lines.as_slice())
         .unwrap_or(&snapshot.source.logical_lines);
-    let matches = match snapshot.action {
+    let raw_matches = match snapshot.action {
         PickerAction::Copy => {
             let custom_patterns = compile_pattern_specs(&snapshot.custom_patterns);
             find_matches(logical_lines, &custom_patterns)
         }
         PickerAction::OpenUrl => find_openable_urls(logical_lines),
     };
+    let matches = crate::hyperlinks::merge_matches(raw_matches, snapshot.extra_matches.clone());
     let assignments = assign_hints(matches.clone());
 
     let lines = if assignments.is_empty() {
@@ -189,6 +190,7 @@ mod tests {
             },
             action: PickerAction::Copy,
             custom_patterns: Vec::new(),
+            extra_matches: Vec::new(),
         }
     }
 

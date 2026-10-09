@@ -40,6 +40,13 @@ pub struct AppliedLayout {
 pub trait HerdrClient {
     fn pane_layout(&mut self, pane: &PaneId) -> Result<LayoutSnapshot>;
     fn pane_read_visible(&mut self, pane: &PaneId, lines: u16) -> Result<String>;
+    fn pane_read_visible_ansi(&mut self, pane: &PaneId, lines: u16) -> Result<String>;
+    fn pane_link_activate(
+        &mut self,
+        pane: &PaneId,
+        viewport_row: u16,
+        col: u16,
+    ) -> Result<Option<String>>;
     fn apply_layout(
         &mut self,
         workspace_id: &str,
@@ -93,6 +100,25 @@ impl HerdrClient for SocketHerdrClient {
     fn pane_read_visible(&mut self, pane: &PaneId, lines: u16) -> Result<String> {
         let (id, value) = self.call("pane.read", protocol::pane_read_params(&pane.0, lines))?;
         protocol::pane_read(value, &id)
+    }
+
+    fn pane_read_visible_ansi(&mut self, pane: &PaneId, lines: u16) -> Result<String> {
+        let (id, value) =
+            self.call("pane.read", protocol::pane_read_ansi_params(&pane.0, lines))?;
+        protocol::pane_read(value, &id)
+    }
+
+    fn pane_link_activate(
+        &mut self,
+        pane: &PaneId,
+        viewport_row: u16,
+        col: u16,
+    ) -> Result<Option<String>> {
+        let (id, value) = self.call(
+            "pane.link.activate",
+            protocol::pane_link_activate_params(&pane.0, viewport_row, col),
+        )?;
+        protocol::pane_link_activate(value, &id)
     }
 
     fn apply_layout(

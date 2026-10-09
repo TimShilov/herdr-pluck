@@ -3,6 +3,7 @@ pub mod clipboard;
 pub mod config;
 pub mod herdr;
 pub mod hints;
+pub mod hyperlinks;
 pub mod model;
 pub mod patterns;
 pub mod picker;

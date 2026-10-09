@@ -1,7 +1,7 @@
 use crate::herdr::layout::{derive_source_geometry, derive_source_pane_geometries, LayoutSnapshot};
 use crate::model::{
-    PaneId, PaneTextCaptureMode, PatternSpec, PickerAction, PickerReturnContext, PickerSnapshot,
-    SourcePaneSnapshot, VisibleViewport,
+    MatchSpan, PaneId, PaneTextCaptureMode, PatternSpec, PickerAction, PickerReturnContext,
+    PickerSnapshot, SourcePaneSnapshot, VisibleViewport,
 };
 use anyhow::{bail, Context, Result};
 use std::fs;
@@ -88,6 +88,7 @@ pub fn build_source_snapshot(
     session: PickerReturnContext,
     action: PickerAction,
     custom_patterns: Vec<PatternSpec>,
+    extra_matches: Vec<MatchSpan>,
 ) -> Result<PickerSnapshot> {
     let source_tab_id = layout
         .tab_id
@@ -117,6 +118,7 @@ pub fn build_source_snapshot(
         session,
         action,
         custom_patterns,
+        extra_matches,
     })
 }
 

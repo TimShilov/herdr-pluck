@@ -26,12 +26,18 @@ pub fn launch_layout_tab_picker<C: HerdrClient>(
     }
 
     let visible_text = client.pane_read_visible(target, read_lines)?;
+    let visible_ansi = client
+        .pane_read_visible_ansi(target, read_lines)
+        .unwrap_or_default();
 
     let viewport = map_visible_viewport(
         visible_text.lines().map(str::to_string).collect(),
         geometry.source_content_rect.width,
         read_lines,
     );
+
+    let extra_matches =
+        crate::hyperlinks::detect_hyperlinks(client, target, &visible_ansi, &viewport);
 
     let return_context = PickerReturnContext {
         return_tab_id: layout
@@ -50,6 +56,7 @@ pub fn launch_layout_tab_picker<C: HerdrClient>(
         return_context.clone(),
         action,
         custom_patterns,
+        extra_matches,
     )?;
 
     let files = PickerLaunchFiles::create(&snapshot)?;
@@ -225,6 +232,19 @@ mod tests {
             Ok("https://example.com".into())
         }
 
+        fn pane_read_visible_ansi(&mut self, _pane: &PaneId, _lines: u16) -> Result<String> {
+            Ok(String::new())
+        }
+
+        fn pane_link_activate(
+            &mut self,
+            _pane: &PaneId,
+            _viewport_row: u16,
+            _col: u16,
+        ) -> Result<Option<String>> {
+            Ok(None)
+        }
+
         fn apply_layout(
             &mut self,
             workspace_id: &str,
@@ -324,6 +344,7 @@ mod tests {
             },
             action: PickerAction::Copy,
             custom_patterns: Vec::new(),
+            extra_matches: Vec::new(),
         }
     }
 

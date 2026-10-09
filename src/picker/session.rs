@@ -201,6 +201,7 @@ mod tests {
             },
             action: PickerAction::Copy,
             custom_patterns: Vec::new(),
+            extra_matches: Vec::new(),
         }
     }
 

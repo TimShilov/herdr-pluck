@@ -137,6 +137,23 @@ enum OkResult {
     Ok {},
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+enum PaneLinkActivateResult {
+    PaneLinkActivated {
+        url: Option<String>,
+        #[allow(dead_code)]
+        handled: bool,
+    },
+}
+
+#[derive(Debug, Serialize)]
+pub(crate) struct PaneLinkActivateParams<'a> {
+    pub pane_id: &'a str,
+    pub viewport_row: u16,
+    pub col: u16,
+}
+
 pub(crate) fn request<P>(id: String, method: &str, params: P) -> Request<'_, P> {
     Request { id, method, params }
 }
@@ -156,6 +173,28 @@ pub(crate) fn pane_read_params(pane_id: &str, lines: u16) -> PaneReadParams<'_> 
         lines: u32::from(lines),
         format: "text",
         strip_ansi: true,
+    }
+}
+
+pub(crate) fn pane_read_ansi_params(pane_id: &str, lines: u16) -> PaneReadParams<'_> {
+    PaneReadParams {
+        pane_id,
+        source: "visible",
+        lines: u32::from(lines),
+        format: "ansi",
+        strip_ansi: false,
+    }
+}
+
+pub(crate) fn pane_link_activate_params(
+    pane_id: &str,
+    viewport_row: u16,
+    col: u16,
+) -> PaneLinkActivateParams<'_> {
+    PaneLinkActivateParams {
+        pane_id,
+        viewport_row,
+        col,
     }
 }
 
@@ -197,6 +236,12 @@ pub(crate) fn pane_focused(value: Value, id: &str) -> Result<()> {
 
 pub(crate) fn pane_zoomed(value: Value, id: &str) -> Result<()> {
     decode::<PaneZoomResult>(value, id).map(|_| ())
+}
+
+pub(crate) fn pane_link_activate(value: Value, id: &str) -> Result<Option<String>> {
+    match decode::<PaneLinkActivateResult>(value, id)? {
+        PaneLinkActivateResult::PaneLinkActivated { url, .. } => Ok(url),
+    }
 }
 
 pub(crate) fn tab_focused(value: Value, id: &str) -> Result<()> {

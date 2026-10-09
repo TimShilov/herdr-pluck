@@ -177,6 +177,8 @@ pub struct PickerSnapshot {
     pub action: PickerAction,
     #[serde(default)]
     pub custom_patterns: Vec<PatternSpec>,
+    #[serde(default)]
+    pub extra_matches: Vec<MatchSpan>,
 }
 
 /// Direction of a Herdr binary pane split as exposed by layout snapshots and replay commands.
